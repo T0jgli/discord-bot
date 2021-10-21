@@ -1,9 +1,14 @@
 FROM node:alpine
-WORKDIR discord-music-bot
+
+WORKDIR /usr/src/app
+
+RUN apk update || : && apk add python3
 RUN apk add ffmpeg
 
-COPY . .
+COPY package*.json ./
+
 RUN npm install
 
-CMD yarn start
+COPY . .
 
+CMD ["npm", "start"]
