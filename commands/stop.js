@@ -1,33 +1,24 @@
-const {GuildMember} = require('discord.js');
+const { SlashCommand } = require('slash-create');
 
-module.exports = {
-  name: 'stop',
-  description: 'Stop all songs in the queue!',
-  async execute(interaction, player) {
-    if (!(interaction.member instanceof GuildMember) || !interaction.member.voice.channel) {
-      return void interaction.reply({
-        content: 'You are not in a voice channel!',
-        ephemeral: true,
-      });
+module.exports = class extends SlashCommand {
+    constructor(creator) {
+        super(creator, {
+            name: 'stop',
+            description: 'Stop the player',
+
+            guildIDs: process.env.DISCORD_GUILD_ID ? [ process.env.DISCORD_GUILD_ID ] : undefined
+        });
     }
 
-    if (
-      interaction.guild.me.voice.channelId &&
-      interaction.member.voice.channelId !== interaction.guild.me.voice.channelId
-    ) {
-      return void interaction.reply({
-        content: 'You are not in my voice channel!',
-        ephemeral: true,
-      });
-    }
+    async run(ctx) {
+        
+        const { client } = require('..');
 
-    await interaction.deferReply();
-    const queue = player.getQueue(interaction.guildId);
-    if (!queue || !queue.playing)
-      return void interaction.followUp({
-        content: '❌ | No music is being played!',
-      });
-    queue.destroy();
-    return void interaction.followUp({content: '🛑 | Stopped the player!'});
-  },
+        await ctx.defer();
+        const queue = client.player.getQueue(ctx.guildID);
+        if (!queue || !queue.playing) return void ctx.sendFollowUp({ content: '❌ | No music is being played!' });
+        queue.destroy();
+        return void ctx.sendFollowUp({ content: '🛑 | Stopped the player!' });
+
+    }
 };
